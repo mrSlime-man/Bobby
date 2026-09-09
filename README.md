@@ -24,6 +24,28 @@ confirmation is limited. Treat Workday, Greenhouse, iCIMS, and ADP as
 experimental observations, not compatibility guarantees. Other ATS paths are
 subject to per-site verification.
 
+## Proven in production
+
+The private validation baseline behind this public alpha includes:
+
+- A confirmed real external ATS submission in a controlled, human-supervised run.
+- 1,300+ offline regression tests covering safety and workflow behavior.
+- Duplicate-submit protection and durable submit-state checks.
+- Provider fallback with bounded health and quota handling.
+- An application tracker with run IDs, evidence fields, and redaction.
+
+These results describe the current private validation baseline, not a promise
+of universal ATS compatibility or unattended operation.
+
+## Screenshots
+
+The GTK control panel keeps the main workflow visible: run state, metrics,
+search profiles, and safety controls are available from one local interface.
+
+![Bobby dashboard](assets/screenshots/dashboard.png)
+
+![Bobby search profiles](assets/screenshots/search-profiles.png)
+
 ## Safety boundaries
 
 The public example configuration enables `TEST_MODE` and
