@@ -1,0 +1,107 @@
+[project]
+name = "bobby-job-application-agent"
+version = "0.1.0-alpha.1"
+description = "Local-first, human-supervised job-application assistant"
+authors = [{name = "Bobby contributors"}]
+readme = {text = "Bobby local checkout; see the generated public alpha for user documentation.", content-type = "text/plain"}
+requires-python = "==3.12.7"
+dependencies = [
+    "browser-use==0.12.6",
+    "fastapi==0.115.12",
+    "httpx==0.28.1",
+    "inquirer==3.4.1",
+    "jsonschema==4.23.0",
+    "jsonschema-specifications==2023.12.1",
+    "langchain==1.2.15",
+    "langchain-anthropic==1.3.1",
+    "langchain-community==0.4.1",
+    "langchain-core==1.3.0",
+    "langchain-google-genai==4.2.2",
+    "langchain-ollama==1.1.0",
+    "langchain-openai==1.1.7",
+    "Levenshtein==0.27.3",
+    "loguru==0.7.2",
+    "playwright==1.58.0",
+    "pydantic==2.12.5",
+    "PyYAML==6.0.2",
+    "pypdf==6.9.1",
+    "reportlab==4.4.9",
+    "telethon==1.39.0",
+    "pynput==1.8.1",
+    "python-telegram-bot==21.9",
+    "patchright==1.58.2",
+    "uvicorn==0.34.0",
+    "google-api-python-client>=2.188.0",
+    "google-auth-httplib2>=0.3.0",
+    "google-auth-oauthlib>=1.2.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.4",
+    "pytest-asyncio==0.26.0",
+    "pytest-cov==6.0.0",
+    "pytest-mock==3.14.0",
+    "black==26.1.0",
+    "isort==7.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[dependency-groups]
+dev = [
+    "pytest==8.3.4",
+    "pytest-asyncio==0.26.0",
+    "pytest-cov==6.0.0",
+    "pytest-mock==3.14.0",
+    "black==26.1.0",
+    "isort==7.0.0",
+]
+
+[tool.black]
+line-length = 100
+target-version = ['py312']
+include = '\.pyi?$'
+extend-exclude = '''
+# A regex preceded with ^/ will apply only to files and directories
+# in the root of the project.
+^/build/
+^/dist/
+^/\.eggs/
+^/\.git/
+^/\.hg/
+^/\.mypy_cache/
+^/\.nox/
+^/\.tox/
+^/\.venv/
+^/venv/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+skip = [
+    ".git",
+    ".eggs",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".tox",
+    ".venv",
+    "venv",
+    "build",
+    "dist"]
+
+[tool.pytest.ini_options]
+testpaths = ["./tests/"]
+filterwarnings = ["ignore::DeprecationWarning", "ignore:Support for class-based"]

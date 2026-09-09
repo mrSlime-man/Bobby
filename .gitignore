@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+candidate_profile.yaml
+browser_session/
+data/output/
+data/debug/
+data/resumes/*
+!data/resumes/.gitkeep
+logs/
+backups/
+.venv/
+.pytest_cache/
+__pycache__/
+*.pyc
+*.before_*

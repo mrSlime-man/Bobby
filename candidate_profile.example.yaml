@@ -1,0 +1,55 @@
+# Synthetic example only. Copy to candidate_profile.yaml and replace every fact.
+candidate:
+  legal_name: Taylor Example
+  preferred_name: Taylor
+  email: taylor@example.invalid
+  phone: "+1 555 0100"
+  age_over_18: true
+address:
+  street: 100 Example Street
+  city: Testville
+  state: EX
+  postal_code: "00000"
+  country: United States
+communication:
+  can_receive_email: true
+  can_receive_phone_calls: true
+  can_receive_text_messages: false
+  preferred_contact_method: email
+work_authorization:
+  authorized_to_work_in_us: true
+  requires_sponsorship_now: false
+  requires_sponsorship_future: false
+location_preferences:
+  current_location: Testville, EX
+  relocation_locations: []
+  willing_to_relocate: false
+  willing_to_work_for_out_of_state_employer_remotely: true
+work_arrangement:
+  remote: true
+  hybrid: true
+  onsite: false
+employment_type:
+  full_time: true
+  contract: false
+  part_time: false
+availability:
+  available_to_start_immediately: false
+  currently_employed: true
+  notice_period_days: 14
+languages: [English]
+technical_profile:
+  general: [Python, Git, REST APIs]
+professional_experience:
+  has_customer_service_experience: false
+  known_experience_areas: [software delivery, testing, automation]
+common_answers:
+  are_you_18_or_older: true
+  legally_authorized_to_work_in_us: true
+  require_sponsorship_now: false
+  require_sponsorship_future: false
+  willing_to_work_full_time: true
+  willing_to_work_remote: true
+  willing_to_work_hybrid: true
+  willing_to_work_onsite: false
+  willing_to_use_electronic_signature: true
