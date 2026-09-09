@@ -1,0 +1,50 @@
+personal_information:
+  first_name: Taylor
+  last_name: Example
+  gender: male
+  country: United States
+  city: Testville
+  state_area_region: EX
+  address: 100 Example Street
+  zip_code: "00000"
+  phone: "5550100"
+  phone_code: "+1"
+  email: taylor@example.invalid
+  github: https://www.github.com/taylor-example
+  linkedin: https://www.linkedin.com/in/taylor-example
+education_details:
+  - education_level: Bachelor of Science
+    institution: Example State University
+    field_of_study: Computer Science
+    year_of_completion: 2020
+experience_details:
+  - position: Automation Engineer
+    company: Example Systems
+    employment_period: 2022-present
+    location: Remote
+    key_responsibilities: [Built reliable automation and improved test coverage.]
+    skills_acquired: [Python, CI, REST APIs]
+projects:
+  - name: Example Workflow Toolkit
+    description: A small public demonstration of reliable automation patterns.
+    link: https://github.com/taylor-example/example-workflow-toolkit
+achievements: [Improved release confidence for a representative service.]
+certifications: []
+languages: [English]
+interests: [automation, developer tools, reliable systems]
+availability:
+  notice_period: 14 days
+salary_expectations:
+  salary_range_usd: 70000-90000
+self_identification:
+  disability: decline_to_answer
+  ethnicity: decline_to_answer
+  pronouns: they/them
+  veteran: decline_to_answer
+legal_authorization:
+  legally_allowed_to_work_in_us: true
+  requires_us_sponsorship: false
+work_preferences:
+  remote_work: true
+  in_person_work: false
+  open_to_relocation: false

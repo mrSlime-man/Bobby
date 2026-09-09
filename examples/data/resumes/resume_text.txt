@@ -1,0 +1,11 @@
+Taylor Example
+Software and automation engineer | taylor@example.invalid
+
+Builds testable automation, developer tooling, and reliable workflows.
+
+Automation Engineer — Example Systems (2022-present)
+- Built maintainable test and workflow automation.
+- Improved observability and release confidence.
+
+B.S. Computer Science — Example State University (2020)
+Skills: Python, Git, CI, REST APIs, Linux, testing, documentation
