@@ -28,6 +28,7 @@ PRIVATE_FILES = {
     "README.md", "architecture.excalidraw", "external_stats.py", "gmail_auth.py",
     "job_bot_v3_patch.py", "docs/current_task.md", "docs/readiness_audit.md",
     "examples/.env_example", "examples/data/resumes/Alex_Nettleton_CV.pdf",
+    "src/telegram/error_cache.yaml",
 }
 
 SAFE_ENV = """# Copy to .env and replace placeholders locally. Never commit .env.
@@ -228,6 +229,28 @@ The alpha has broad ATS detection and workflow code, but independent live
 confirmation is limited. Treat Workday, Greenhouse, iCIMS, and ADP as
 experimental observations, not compatibility guarantees. Other ATS paths are
 subject to per-site verification.
+
+## Proven in production
+
+The private validation baseline behind this public alpha includes:
+
+- A confirmed real external ATS submission in a controlled, human-supervised run.
+- 1,300+ offline regression tests covering safety and workflow behavior.
+- Duplicate-submit protection and durable submit-state checks.
+- Provider fallback with bounded health and quota handling.
+- An application tracker with run IDs, evidence fields, and redaction.
+
+These results describe the current private validation baseline, not a promise
+of universal ATS compatibility or unattended operation.
+
+## Screenshots
+
+The GTK control panel keeps the main workflow visible: run state, metrics,
+search profiles, and safety controls are available from one local interface.
+
+![Bobby dashboard](assets/screenshots/dashboard.png)
+
+![Bobby search profiles](assets/screenshots/search-profiles.png)
 
 ## Safety boundaries
 
@@ -586,15 +609,28 @@ def build(destination: Path) -> None:
             raise RuntimeError("destination export marker does not identify Bobby")
 
     temporary = Path(tempfile.mkdtemp(prefix=".bobby-public-", dir=destination.parent))
+    preserved_git: Path | None = None
     try:
         copy_source_tree(temporary)
         generate_public_files(temporary)
         check(temporary, quiet=True)
         if destination.exists():
+            destination_git = destination / ".git"
+            if destination_git.exists():
+                preserved_git = Path(tempfile.mkdtemp(prefix=".bobby-public-git-", dir=destination.parent)) / ".git"
+                shutil.move(str(destination_git), str(preserved_git))
             shutil.rmtree(destination)
         temporary.rename(destination)
+        if preserved_git is not None:
+            shutil.move(str(preserved_git), str(destination / ".git"))
+            preserved_git.parent.rmdir()
+            preserved_git = None
     except Exception:
         shutil.rmtree(temporary, ignore_errors=True)
+        if preserved_git is not None and preserved_git.exists():
+            destination.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(preserved_git), str(destination / ".git"))
+            preserved_git.parent.rmdir()
         raise
     print(f"PUBLIC BUILD PASS {destination}")
 
@@ -678,6 +714,8 @@ def check(root: Path, *, quiet: bool = False) -> None:
             continue
         relative = path.relative_to(root).as_posix()
         parts = set(Path(relative).parts)
+        if parts & PRIVATE_PARTS:
+            continue
         if path.name in private_names or parts & {"browser_session", "logs", "audit", "backups"}:
             failures.append(("NAME", relative, "PRIVATE"))
         if relative.startswith(("data/output/", "data/debug/")):
