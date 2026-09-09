@@ -1,0 +1,17 @@
+dry_run: true
+execute_archives: false
+execute_replies: false
+max_conversations_to_scan: 25
+unread_only: false
+auto_star_job_offers: true
+auto_label_job_offers: true
+skip_drafting_for_personal_messages: true
+reply_tone: a thoughtful senior engineering leader
+reply_max_characters: 600
+reply_short_paragraphs: true
+reply_avoid_em_dash: true
+old_message_threshold_days: 60
+old_message_apology_enabled: true
+old_message_apology_reason: you've been busy with multiple projects
+old_job_message_follow_up_enabled: true
+old_job_message_follow_up_text: ask if the opportunity is still available
