@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Job Applier Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="dashboard-loading" aria-busy="true">
+  <div id="dashboard-loading" class="loading-shell" role="status" aria-live="polite" aria-label="Loading dashboard data">
+    <div class="loading-frame">
+      <section class="loading-hero loading-panel">
+        <div>
+          <span class="skeleton-line short"></span>
+          <span class="skeleton-line title"></span>
+          <span class="skeleton-line medium"></span>
+        </div>
+        <div class="loading-controls">
+          <span class="skeleton-pill"></span>
+          <span class="skeleton-pill"></span>
+          <span class="skeleton-pill danger"></span>
+        </div>
+      </section>
+
+      <section class="loading-summary">
+        <span class="loading-panel skeleton-card"></span>
+        <span class="loading-panel skeleton-card"></span>
+        <span class="loading-panel skeleton-card"></span>
+        <span class="loading-panel skeleton-card"></span>
+        <span class="loading-panel skeleton-card"></span>
+      </section>
+
+      <section class="loading-grid">
+        <div class="loading-panel skeleton-live">
+          <span class="skeleton-line short"></span>
+          <span class="skeleton-box current"></span>
+          <div class="skeleton-metrics">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <span class="skeleton-line wide"></span>
+          <span class="skeleton-line medium"></span>
+          <span class="skeleton-line wide"></span>
+        </div>
+        <div class="loading-panel skeleton-shot">
+          <span class="skeleton-line short"></span>
+          <span class="skeleton-box screenshot-shape"></span>
+        </div>
+      </section>
+
+      <section class="loading-grid board">
+        <div class="loading-panel skeleton-table">
+          <span class="skeleton-line short"></span>
+          <span class="skeleton-table-row"></span>
+          <span class="skeleton-table-row"></span>
+          <span class="skeleton-table-row"></span>
+          <span class="skeleton-table-row"></span>
+        </div>
+        <div class="loading-panel skeleton-detail">
+          <span class="skeleton-line short"></span>
+          <span class="skeleton-line title"></span>
+          <span class="skeleton-box detail-box"></span>
+          <span class="skeleton-box detail-box"></span>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <main class="layout">
+    <section class="hero panel">
+      <div>
+        <p class="eyebrow" id="site-eyebrow">AI Job Applier</p>
+        <h1>Operations Dashboard</h1>
+        <p class="muted">Track live job discovery, application progress, screenshots, and runtime settings.</p>
+      </div>
+      <div class="controls">
+        <a href="/messages" class="secondary" style="text-decoration:none;padding:0.45rem 0.9rem;border-radius:6px;font-size:0.82rem;">Messages</a>
+        <button id="start-run">Start Run</button>
+        <button id="pause-run" class="secondary">Pause</button>
+        <button id="resume-run" class="secondary">Resume</button>
+        <button id="stop-run" class="danger">Stop</button>
+      </div>
+    </section>
+
+    <section class="grid-summary" id="summary-cards"></section>
+
+    <section class="grid-main">
+      <div class="panel">
+        <div class="section-header">
+          <h2>Live Run</h2>
+          <div class="toolbar">
+            <span id="timeline-source" class="muted">Showing live timeline</span>
+            <button id="clear-run-filter" class="secondary small">Show Live</button>
+            <span id="run-status" class="badge">idle</span>
+          </div>
+        </div>
+        <div id="current-job" class="current-job muted">No active job</div>
+        <dl id="live-metrics" class="metrics"></dl>
+        <div class="timeline" id="timeline"></div>
+      </div>
+
+      <div class="panel">
+        <div class="section-header">
+          <h2>Browser Snapshot</h2>
+          <button id="refresh-screenshot" class="secondary small">Refresh</button>
+        </div>
+        <img id="screenshot" class="screenshot" alt="Latest browser screenshot">
+        <p id="screenshot-meta" class="muted" style="font-size:0.78rem;margin:0.5rem 0 0">No screenshot yet</p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>Run History</h2>
+      </div>
+      <div id="run-history" class="run-history"></div>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>Run Details</h2>
+        <button id="export-run" class="secondary small" disabled>Export JSON</button>
+      </div>
+      <div id="run-detail-summary" class="run-detail-summary muted">Select a run to inspect it directly.</div>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>Screenshot History</h2>
+      </div>
+      <div id="screenshot-history" class="screenshot-history muted">Select a run to see its screenshots.</div>
+    </section>
+
+    <section class="grid-board">
+      <div class="panel jobs-board-panel">
+        <div class="section-header">
+          <h2>Jobs Board <span id="jobs-count" class="section-count">(0)</span></h2>
+          <div class="toolbar">
+            <button id="refresh-jobs" class="secondary small" type="button">Refresh Jobs</button>
+            <select id="job-status-filter">
+              <option value="">All statuses</option>
+              <option value="in_progress">In progress</option>
+              <option value="applied">Applied</option>
+              <option value="skipped">Skipped</option>
+              <option value="failed">Failed</option>
+              <option value="interesting">Interesting</option>
+            </select>
+            <input id="job-search" type="search" placeholder="Search company, title, or URL">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Executed At</th>
+                <th>Title</th>
+                <th>Company</th>
+                <th>Score</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody id="jobs-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel job-details-panel">
+        <div class="section-header">
+          <h2>Job Details</h2>
+        </div>
+        <div id="job-details" class="job-details muted">Select a job from the board to inspect it.</div>
+      </div>
+    </section>
+
+    <section class="grid-config">
+      <div class="panel">
+        <div class="section-header">
+          <h2>Search Config</h2>
+          <button id="save-search-config">Save Search Config</button>
+        </div>
+        <form id="search-config-form" class="form-grid"></form>
+      </div>
+
+      <div class="panel">
+        <div class="section-header">
+          <h2>App Config</h2>
+          <button id="save-app-config">Save App Config</button>
+        </div>
+        <form id="app-config-form" class="form-grid"></form>
+      </div>
+    </section>
+  </main>
+
+  <template id="summary-card-template">
+    <article class="summary-card panel">
+      <p class="summary-label"></p>
+      <p class="summary-value"></p>
+    </article>
+  </template>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

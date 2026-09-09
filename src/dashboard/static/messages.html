@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/static/styles.css">
+  <style>
+    .section-header a { font-size:0.82rem; color:var(--accent); text-decoration:none; }
+    .section-header a:hover { text-decoration:underline; }
+  </style>
+</head>
+<body>
+  <main class="layout">
+    <section class="hero panel">
+      <div>
+        <p class="eyebrow" id="site-eyebrow">AI Job Applier</p>
+        <h1>Messages Dashboard</h1>
+        <p class="muted">Inspect classified LinkedIn conversations, drafted replies, and execution results.</p>
+      </div>
+      <div class="controls">
+        <a href="/" class="secondary" style="text-decoration:none;padding:0.45rem 0.9rem;border-radius:6px;font-size:0.82rem;">← Back to Operations</a>
+      </div>
+    </section>
+
+    <section class="grid-board">
+      <div class="panel">
+        <div class="section-header">
+          <h2>Conversations</h2>
+          <div class="toolbar">
+            <select id="messages-category-filter">
+              <option value="">All categories</option>
+              <option value="job_offer_to_me">Job Offers</option>
+              <option value="marketing_spam">Marketing / Spam</option>
+              <option value="personal_message">Personal</option>
+              <option value="looking_for_job">Job Seekers</option>
+            </select>
+            <select id="messages-status-filter">
+              <option value="">All statuses</option>
+              <option value="classified">Classified</option>
+              <option value="skipped">Skipped</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Participant</th>
+                <th>Category</th>
+                <th>Confidence</th>
+                <th>Action</th>
+                <th>Reply</th>
+                <th>Starred</th>
+                <th>Labeled</th>
+                <th>Updated</th>
+              </tr>
+            </thead>
+            <tbody id="messages-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-header">
+          <h2>Message Details</h2>
+        </div>
+        <div id="message-details" class="message-details muted">Select a conversation to inspect it.</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const messagesBody = document.getElementById("messages-body");
+    const messageDetails = document.getElementById("message-details");
+    const messagesCategoryFilter = document.getElementById("messages-category-filter");
+    const messagesStatusFilter = document.getElementById("messages-status-filter");
+    const siteEyebrow = document.getElementById("site-eyebrow");
+
+    let currentMessages = [];
+
+    init();
+
+    async function init() {
+      const meta = await fetchJson("/api/meta");
+      siteEyebrow.textContent = `${meta.site_name} AI Job Applier`;
+
+      messagesCategoryFilter.onchange = refreshMessages;
+      messagesStatusFilter.onchange = refreshMessages;
+      await refreshMessages();
+    }
+
+    async function refreshMessages() {
+      const query = new URLSearchParams();
+      if (messagesCategoryFilter.value) query.set("category", messagesCategoryFilter.value);
+      if (messagesStatusFilter.value) query.set("status", messagesStatusFilter.value);
+      const payload = await fetchJson(`/api/messages?${query.toString()}`);
+      renderMessages(payload.messages);
+    }
+
+    function renderMessages(messages) {
+      currentMessages = messages;
+      messagesBody.innerHTML = messages
+        .map((msg, index) => {
+          const category = msg.category || msg.processing_status || "-";
+          const confidence = msg.confidence != null ? `${msg.confidence}%` : "-";
+          const action = msg.proposed_action || "-";
+          const reply = msg.draft_reply ? "Yes" : "-";
+          const starred = (msg.star_execution || {}).status || "-";
+          const labeled = (msg.label_as_jobs_execution || {}).status || "-";
+          const updated = formatDateTime(msg.updated_at);
+          const actionStatus = (msg.action_execution || {}).status;
+          const categoryStatus = categoryBadgeStatus(category);
+
+          return `<tr class="msg-row" data-msg-index="${index}">
+            <td>${escHtml(msg.participant_name || "-")}</td>
+            <td><span class="badge" data-status="${categoryStatus}">${category}</span></td>
+            <td>${confidence}</td>
+            <td><span class="badge" data-status="${actionStatus || ""}">${action}</span></td>
+            <td>${reply}</td>
+            <td>${starred}</td>
+            <td>${labeled}</td>
+            <td>${updated}</td>
+          </tr>`;
+        })
+        .join("");
+
+      for (const row of messagesBody.querySelectorAll(".msg-row")) {
+        row.onclick = () => renderMessageDetail(currentMessages[Number(row.dataset.msgIndex)]);
+      }
+
+      if (messages.length > 0) {
+        renderMessageDetail(messages[0]);
+      } else {
+        messageDetails.textContent = "No conversations match the current filter.";
+        messageDetails.className = "message-details muted";
+      }
+    }
+
+    function categoryBadgeStatus(category) {
+      switch (category) {
+        case "job_offer_to_me": return "applied";
+        case "marketing_spam": return "failed";
+        case "personal_message": return "interesting";
+        case "looking_for_job": return "skipped";
+        default: return "";
+      }
+    }
+
+    function renderMessageDetail(msg) {
+      if (!msg) {
+        messageDetails.textContent = "Select a conversation to inspect it.";
+        messageDetails.className = "message-details muted";
+        return;
+      }
+
+      const starred = (msg.star_execution || {}).status || "-";
+      const labeled = (msg.label_as_jobs_execution || {}).status || "-";
+      const actionExec = msg.action_execution || {};
+      const messagesHtml = (msg.messages || []).length
+        ? (msg.messages || []).map(m =>
+            `<div class="msg-bubble">
+              <div class="msg-sender">${escHtml(m.sender || "Unknown")} <span class="muted">${escHtml(m.timestamp || "")}</span></div>
+              <div class="msg-body">${escHtml(m.body || "")}</div>
+            </div>`
+          ).join("")
+        : '<p class="muted">No messages extracted.</p>';
+
+      messageDetails.className = "message-details";
+      messageDetails.innerHTML = `
+        <div class="detail-header">
+          <h3>${escHtml(msg.participant_name || "Unknown")}</h3>
+          <p class="muted">${escHtml(msg.participant_headline || "No headline")}</p>
+          <p class="muted">Snippet: ${escHtml(msg.snippet || "-")}</p>
+        </div>
+        <dl class="detail-grid">
+          <dt>Category</dt><dd>${msg.category || "-"} (${msg.confidence != null ? msg.confidence + "%" : "N/A"})</dd>
+          <dt>Proposed Action</dt><dd>${msg.proposed_action || "-"}</dd>
+          <dt>Action Result</dt><dd>${actionExec.status || "-"}: ${actionExec.message || ""}</dd>
+          <dt>Starred</dt><dd>${starred}</dd>
+          <dt>Labeled as Jobs</dt><dd>${labeled}</dd>
+          <dt>Updated</dt><dd>${formatDateTime(msg.updated_at)}</dd>
+        </dl>
+        ${msg.reasoning ? `<div class="msg-reasoning"><strong>Reasoning</strong><p>${escHtml(msg.reasoning)}</p></div>` : ""}
+        ${msg.draft_reply ? `<div class="msg-reply"><strong>Draft Reply</strong><p>${escHtml(msg.draft_reply)}</p></div>` : ""}
+        ${(msg.messages || []).length ? `<div class="msg-thread"><strong>Conversation</strong>${messagesHtml}</div>` : ""}
+      `;
+    }
+
+    function escHtml(text) {
+      if (!text) return "";
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "-";
+      const parsed = value instanceof Date ? value : new Date(value);
+      if (isNaN(parsed.getTime())) return String(value);
+      return parsed.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        const detail = await response.text().catch(() => "");
+        throw new Error(`API error ${response.status}: ${detail}`);
+      }
+      return response.json();
+    }
+  </script>
+</body>
+</html>
