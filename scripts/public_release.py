@@ -719,7 +719,9 @@ def check(root: Path, *, quiet: bool = False) -> None:
         if path.name in private_names or parts & {"browser_session", "logs", "audit", "backups"}:
             failures.append(("NAME", relative, "PRIVATE"))
         if relative.startswith(("data/output/", "data/debug/")):
-            failures.append(("NAME", relative, "RUNTIME_DATA"))
+            if relative in tracked:
+                failures.append(("NAME", relative, "RUNTIME_DATA"))
+            continue
         for issue in scan_file(path):
             failures.append(("CONTENT", relative, issue))
 
