@@ -739,7 +739,13 @@ def main() -> int:
     parser.add_argument("command", choices=("build", "check", "publish"))
     parser.add_argument("--destination", help="public export directory")
     args = parser.parse_args()
-    destination = Path(args.destination or os.getenv("BOBBY_PUBLIC_DIR", str(DEFAULT_DESTINATION))).expanduser().resolve()
+    requested_destination = args.destination or os.getenv("BOBBY_PUBLIC_DIR")
+    if requested_destination:
+        destination = Path(requested_destination).expanduser().resolve()
+    elif args.command == "check":
+        destination = SOURCE_ROOT
+    else:
+        destination = DEFAULT_DESTINATION
     if args.command in {"build", "publish"}:
         build(destination)
     check(destination)
